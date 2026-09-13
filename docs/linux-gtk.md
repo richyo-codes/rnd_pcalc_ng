@@ -82,7 +82,7 @@ a registered `richyo-codes` fork, and a pinned SDK revision. It does not compile
 the Flutter engine or modify the repository's default `.fvmrc` outside the job.
 
 - Branch: `3.48.0-gtk4.issue94804.20260911`
-- Framework revision: `c54f543d1d9a121cf359f2dbcf30ebebde8ff1d1`
+- Framework revision: `280e8df0ab1f91a87078de00705b61b8d47d8719`
 - Prebuilt engine ID: `61dae0cb8f6752dae2404a6c142737f04df2592e`
 
 The job sets these before FVM installs or runs Flutter:

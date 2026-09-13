@@ -160,6 +160,123 @@ jobs:
           append-max-detail-suffix: true
           retention-days: 7
 
+  linux_gtk4:
+    name: Linux GTK4 (prebuilt custom Flutter)
+    runs-on: ubuntu-26.04
+    timeout-minutes: 60
+    env:
+      FLUTTER_GTK4_REPOSITORY: https://github.com/richyo-codes/flutter.git
+      FLUTTER_GTK4_BRANCH: 3.48.0-gtk4.issue94804.20260911
+      FLUTTER_GTK4_SHA: 280e8df0ab1f91a87078de00705b61b8d47d8719
+      FLUTTER_PREBUILT_ENGINE_VERSION: 61dae0cb8f6752dae2404a6c142737f04df2592e
+      FLUTTER_ENGINE_STORAGE_BASE_URL: https://pub-79a02b1963fb4da6b5e4e4816e8b7146.r2.dev
+      FLUTTER_LINUX_GTK: gtk4
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # Compute before FVM changes the job-local .fvmrc.
+      - name: Compute version
+        id: version
+        uses: ./.github/actions/compute-version
+
+      - name: Install Linux GTK4 build dependencies
+        shell: bash
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            clang libclang-dev llvm-dev libclang-22-dev llvm-22-dev \
+            cmake ninja-build pkg-config libgtk-4-dev liblzma-dev \
+            libstdc++-12-dev lld curl git unzip xz-utils zip libglu1-mesa \
+            libsecret-1-dev libssl-dev libmimalloc-dev
+
+      - name: Set up Dart for FVM
+        uses: dart-lang/setup-dart@v1
+        with:
+          sdk: stable
+
+      - name: Install FVM
+        shell: bash
+        run: |
+          dart pub global activate fvm 4.2.0
+          echo "$HOME/.pub-cache/bin" >> "$GITHUB_PATH"
+
+      - name: Verify requested Flutter branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          actual_sha="$(git ls-remote "$FLUTTER_GTK4_REPOSITORY" "refs/heads/$FLUTTER_GTK4_BRANCH" | awk '{print $1}')"
+          test "$actual_sha" = "$FLUTTER_GTK4_SHA"
+
+      - name: Register fork and install pinned Flutter GTK4 SDK
+        shell: bash
+        run: |
+          set -euo pipefail
+          fvm fork add richyo-codes "$FLUTTER_GTK4_REPOSITORY"
+          FLUTTER_STORAGE_BASE_URL="$FLUTTER_ENGINE_STORAGE_BASE_URL" \
+            fvm install "richyo-codes/$FLUTTER_GTK4_SHA" --setup --skip-pub-get
+          fvm use "richyo-codes/$FLUTTER_GTK4_SHA" --force --skip-setup --skip-pub-get
+
+      - name: Install and verify prebuilt Linux GTK4 engines
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git -C .fvm/flutter_sdk rev-parse HEAD)" = "$FLUTTER_GTK4_SHA"
+          test "$(cat .fvm/flutter_sdk/bin/cache/engine.stamp)" = "$FLUTTER_PREBUILT_ENGINE_VERSION"
+          bash ./tool/install_gtk4_prebuilt_engine.sh .fvm/flutter_sdk
+          fvm flutter config --enable-linux-desktop
+          # R2 provides the custom engine artifacts. Flutter's normal storage
+          # still supplies shared assets such as Material fonts.
+          fvm flutter precache --linux
+          engine=.fvm/flutter_sdk/bin/cache/artifacts/engine/linux-x64-release/libflutter_linux_gtk4.so
+          if [[ ! -f "$engine" ]]; then
+            echo "::error::Published engine $FLUTTER_PREBUILT_ENGINE_VERSION is missing libflutter_linux_gtk4.so. Republish the Linux archives with GTK4 included; the GTK3 engine is not a substitute."
+            exit 1
+          fi
+
+      - name: Select GTK4 Linux runner
+        run: bash ./tool/configure_linux_variant.sh gtk4
+
+      - name: Install Flutter dependencies
+        run: fvm flutter pub get
+
+      - name: Build Linux GTK4 release
+        run: fvm flutter build linux --release --linux-gtk=gtk4
+
+      - name: Verify GTK4 linkage and include provenance
+        shell: bash
+        env:
+          ARTIFACT_VERSION: ${{ steps.version.outputs.semver }}
+        run: |
+          set -euo pipefail
+          bundle=build/linux-gtk4/x64/release/bundle
+          test -f "$bundle/lib/libflutter_linux_gtk4.so"
+          ldd "$bundle/rnd_pcalc_ng" | tee "$RUNNER_TEMP/pcalc-gtk4-linkage.txt"
+          grep -q 'libgtk-4.so' "$RUNNER_TEMP/pcalc-gtk4-linkage.txt"
+          if grep -Eq 'libgtk-3.so|not found' "$RUNNER_TEMP/pcalc-gtk4-linkage.txt"; then
+            echo "GTK4 bundle contains GTK3 or unresolved libraries." >&2
+            exit 1
+          fi
+          cp LICENSE "$bundle/"
+          printf 'App version: %s\nApp commit: %s\nFlutter source: %s\nFlutter branch: %s\nFlutter commit: %s\nEngine artifacts: %s\nStorage: %s\n' \
+            "$ARTIFACT_VERSION" "$GITHUB_SHA" "$FLUTTER_GTK4_REPOSITORY" \
+            "$FLUTTER_GTK4_BRANCH" "$FLUTTER_GTK4_SHA" \
+            "$FLUTTER_PREBUILT_ENGINE_VERSION" "$FLUTTER_ENGINE_STORAGE_BASE_URL" \
+            > "$bundle/BUILD_INFO.txt"
+
+      - name: Upload Linux GTK4 artifact
+        if: github.event_name != 'pull_request'
+        uses: richnetdesign/git-artifact-upload@v2
+        with:
+          name: pcalc-express-linux-x64-gtk4
+          filename: pcalc-express-linux-x64-gtk4
+          version: ${{ steps.version.outputs.semver }}
+          path: build/linux-gtk4/x64/release/bundle/
+          append-max-detail-suffix: true
+          retention-days: 7
+
   windows:
     name: Windows bundle
     runs-on: windows-latest
