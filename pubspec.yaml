@@ -41,8 +41,15 @@ dependencies:
   math_expressions: ^3.0.0
   ffi: ^2.1.4
   url_launcher: ^6.3.2
-  window_manager: ^0.5.1
   shared_preferences: ^2.5.3
+
+dependency_overrides:
+  # Dual GTK3/GTK4 implementation, shared with the dual-runner reference app.
+  url_launcher_linux:
+    git:
+      url: https://github.com/richyo-codes/packages
+      path: packages/url_launcher/url_launcher_linux
+      ref: 1291cce9b9c86c48015e1f95a1875252a6e0d375
 
 dev_dependencies:
   flutter_test:

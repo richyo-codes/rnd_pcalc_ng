@@ -3,11 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:pcalc_express/app_brand.dart';
 import 'package:pcalc_express/backend_preferences.dart';
 import 'package:pcalc_express/calculator.dart';
-import 'package:pcalc_express/platform_capabilities.dart';
 import 'package:pcalc_express/theme_preferences.dart';
 import 'package:pcalc_express/input_preferences.dart';
 import 'package:pcalc_expression_engine/pcalc_expression_engine.dart';
-import 'package:window_manager/window_manager.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -33,25 +31,8 @@ void main() async {
     themeModeNotifier.value = ThemeMode.dark;
   }
 
-  // Configure frameless desktop window and custom drag areas.
-  if (isLinux || isWindows) {
-    await windowManager.ensureInitialized();
-
-    const WindowOptions windowOptions = WindowOptions(
-      size: Size(620, 800),
-      center: true,
-      backgroundColor: Colors.transparent,
-      skipTaskbar: false,
-      title: appTitle,
-      titleBarStyle: TitleBarStyle.hidden,
-    );
-
-    windowManager.waitUntilReadyToShow(windowOptions, () async {
-      await windowManager.setAsFrameless();
-      await windowManager.show();
-      await windowManager.focus();
-    });
-  }
+  // Desktop runners own initial sizing, visibility and frameless decorations.
+  // WindowDragController handles subsequent native window operations.
 
   runApp(
     ValueListenableBuilder<ThemeMode>(
