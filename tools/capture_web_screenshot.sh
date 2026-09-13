@@ -7,14 +7,18 @@ PORT=8090
 THEME=both
 OUTPUT=
 EXPRESSION=
+LAYOUT=phone
+MULTILINE=false
 BUILD=true
 
 usage() {
   cat <<'EOF'
 Usage: tools/capture_web_screenshot.sh [--no-build] [--theme light|dark|both]
                                        [--output PATH] [--port PORT] [--expression TEXT]
+                                       [--expression-file PATH] [--desktop] [--multiline]
 
-Builds the WebAssembly release and captures 393x852 screenshots with Chromium.
+Builds the WebAssembly release and captures phone screenshots with Chromium.
+--desktop uses an exact 1280x1000 viewport; --multiline requires --desktop.
 Unlike widget-test goldens, this uses the browser's real font rendering.
 By default it writes both light and dark screenshots.
 EOF
@@ -42,6 +46,18 @@ while [[ $# -gt 0 ]]; do
       EXPRESSION="$2"
       shift 2
       ;;
+    --expression-file)
+      EXPRESSION="$(< "$2")"
+      shift 2
+      ;;
+    --desktop)
+      LAYOUT=desktop
+      shift
+      ;;
+    --multiline)
+      MULTILINE=true
+      shift
+      ;;
     --help|-h)
       usage
       exit 0
@@ -66,6 +82,11 @@ fi
 
 if [[ "$THEME" == both && -n "$OUTPUT" ]]; then
   echo "--output can only be used with --theme light or --theme dark." >&2
+  exit 2
+fi
+
+if [[ "$MULTILINE" == true && "$LAYOUT" != desktop ]]; then
+  echo "--multiline requires --desktop." >&2
   exit 2
 fi
 
@@ -116,13 +137,15 @@ capture_theme() {
     "http://127.0.0.1:$PORT/?theme=$theme" \
     "$output" \
     "$DEBUG_PORT" \
-    "$EXPRESSION"
+    "$EXPRESSION" \
+    "$LAYOUT" \
+    "$MULTILINE"
   echo "Browser screenshot written to $output"
 }
 
 if [[ "$THEME" == both ]]; then
-  capture_theme light "$ROOT_DIR/test/screenshots/calculator_phone_light.png"
-  capture_theme dark "$ROOT_DIR/test/screenshots/calculator_phone_dark.png"
+  capture_theme light "$ROOT_DIR/test/screenshots/calculator_${LAYOUT}_light.png"
+  capture_theme dark "$ROOT_DIR/test/screenshots/calculator_${LAYOUT}_dark.png"
 else
-  capture_theme "$THEME" "${OUTPUT:-$ROOT_DIR/test/screenshots/calculator_phone_$THEME.png}"
+  capture_theme "$THEME" "${OUTPUT:-$ROOT_DIR/test/screenshots/calculator_${LAYOUT}_$THEME.png}"
 fi

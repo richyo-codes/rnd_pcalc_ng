@@ -6,7 +6,15 @@ with hex and binary, and see the result in four number formats at once.
 **[Open the calculator](https://richyo-codes.github.io/pcalc-express/)** — runs in
 your browser with WebAssembly.
 
-<img src="test/screenshots/calculator_phone_light.png" alt="PCalc Express evaluating (0xFF &lt;&lt; 8) | 0xA5, showing 65445 in decimal and 00 00 FF A5 in hexadecimal" width="393">
+<img src="test/screenshots/calculator_desktop_recursive_lambda.png" alt="PCalc Express evaluating a multiline recursive C++ factorial lambda, showing 3628800 with a compact 32-bit display" width="960">
+
+The [recursive factorial example](test/fixtures/recursive_factorial.cpp)
+evaluates `10!` entirely at compile time.
+
+<img src="test/screenshots/calculator_phone_embedded_bits.png" alt="PCalc Express evaluating an embedded-style bit pattern expression, showing 43605, hexadecimal AA 55, and binary 10101010 01010101" width="393">
+
+The compact editor is equally useful for masks, shifts, and protocol bytes:
+`((0xA5 << 8) | 0x5A) ^ 0x0F0F` produces the recognizable `0xAA55`.
 
 ## Built for expressions
 
@@ -37,7 +45,8 @@ are not accepted; results must be numeric constant expressions.
 - **Enter** or **=** calculates; **Ctrl+E** focuses the expression.
 - Expand the expression editor for multiple lines. **Enter** inserts a newline
   while expanded; **Ctrl+Enter** (or **⌘+Enter**) calculates. A newline button
-  is available when using the calculator keypad. Collapse keeps your text.
+  is available when using the calculator keypad. Drag the grip below the expanded
+  editor to resize it. Collapse keeps your text and chosen height.
 - The keypad inserts at the cursor. **←/→**, **DEL**, and **AC** handle editing.
 - On narrow screens, **0x ▾** opens hex digits and prefixes; **& ▾** opens bitwise
   and logical operators. The expression gets the full row.

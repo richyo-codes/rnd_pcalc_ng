@@ -17,6 +17,9 @@ alongside Flutter's GTK development dependencies. Android uses the evaluator's
 bundled native library; the web build includes its JavaScript loader and WASM.
 Backend availability varies by platform.
 
+For the optional GTK4 runner, engine selection, and native window sizing, see
+[Linux GTK3 / GTK4 development](linux-gtk.md). GTK3 remains the default.
+
 ## Flatpak
 
 Flatpak packaging files live under `flatpak/`.
@@ -65,6 +68,19 @@ choose its destination, or `--port` to choose the temporary server port. Use
 `--no-build` to capture an already-built `build/web/` directory.
 The optional `--expression` argument enters and evaluates an expression before
 capture, so the screenshot shows calculated results.
+
+Recreate the desktop recursive-lambda screenshot from its regression fixture:
+
+```bash
+./tools/capture_web_screenshot.sh --desktop --multiline --theme light \
+  --expression-file test/fixtures/recursive_factorial.cpp \
+  --output test/screenshots/calculator_desktop_recursive_lambda.png
+flutter test test/recursive_factorial_test.dart
+```
+
+Desktop capture uses a fixed 1280 × 1000 viewport. Multiline capture exercises a
+single expand click, drags the editor taller, and evaluates with Ctrl+Enter.
+The fixture is tested with the Clang backend in C++17, C++20, and C++23 modes.
 
 ## GitHub Pages
 
