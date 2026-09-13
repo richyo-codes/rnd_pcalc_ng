@@ -455,18 +455,25 @@ class _WindowControlButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Tooltip(
-      message: tooltip,
-      child: IconButton(
-        icon: Icon(icon, size: 16),
-        onPressed: onPressed,
-        padding: EdgeInsets.zero,
-        constraints: const BoxConstraints.tightFor(
-          width: _chromeControlButtonSize,
-          height: _chromeControlButtonSize,
+    return Semantics(
+      label: tooltip,
+      button: true,
+      onTap: onPressed,
+      excludeSemantics: true,
+      child: Tooltip(
+        message: tooltip,
+        excludeFromSemantics: true,
+        child: IconButton(
+          icon: Icon(icon, size: 16),
+          onPressed: onPressed,
+          padding: EdgeInsets.zero,
+          constraints: const BoxConstraints.tightFor(
+            width: _chromeControlButtonSize,
+            height: _chromeControlButtonSize,
+          ),
+          visualDensity: VisualDensity.compact,
+          splashRadius: 16,
         ),
-        visualDensity: VisualDensity.compact,
-        splashRadius: 16,
       ),
     );
   }
@@ -486,18 +493,25 @@ class WindowChromeActionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Tooltip(
-      message: tooltip,
-      child: IconButton(
-        icon: Icon(icon, size: 16),
-        onPressed: onPressed,
-        padding: EdgeInsets.zero,
-        constraints: const BoxConstraints.tightFor(
-          width: _chromeControlButtonSize,
-          height: _chromeControlButtonSize,
+    return Semantics(
+      label: tooltip,
+      button: true,
+      onTap: onPressed,
+      excludeSemantics: true,
+      child: Tooltip(
+        message: tooltip,
+        excludeFromSemantics: true,
+        child: IconButton(
+          icon: Icon(icon, size: 16),
+          onPressed: onPressed,
+          padding: EdgeInsets.zero,
+          constraints: const BoxConstraints.tightFor(
+            width: _chromeControlButtonSize,
+            height: _chromeControlButtonSize,
+          ),
+          visualDensity: VisualDensity.compact,
+          splashRadius: 16,
         ),
-        visualDensity: VisualDensity.compact,
-        splashRadius: 16,
       ),
     );
   }

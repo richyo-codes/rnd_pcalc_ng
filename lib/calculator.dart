@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart' show kIsWeb;
@@ -445,6 +446,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   bool showCalcButtons = false;
   bool _expressionExpanded = false;
   double? _expressionEditorHeight;
+  String? _copiedResultLabel;
   String _selectedResultLabel = "Dec";
   _ResultDisplayMode _resultDisplayMode = _ResultDisplayMode.adaptive;
 
@@ -483,6 +485,19 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     _focusNode.dispose(); // Dispose of the focus node
     _pageController.dispose();
     super.dispose();
+  }
+
+  Future<void> _copyResult(String label, String value) async {
+    await Clipboard.setData(ClipboardData(text: value));
+    if (!mounted) {
+      return;
+    }
+
+    setState(() => _copiedResultLabel = label);
+    await Future<void>.delayed(const Duration(milliseconds: 1200));
+    if (mounted && _copiedResultLabel == label) {
+      setState(() => _copiedResultLabel = null);
+    }
   }
 
   void _updateInputMode() {
@@ -1106,17 +1121,9 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                                   IconButton(
                                     icon: const Icon(Icons.copy),
                                     tooltip: 'Copy decimal result',
-                                    onPressed: () {
-                                      Clipboard.setData(
-                                        ClipboardData(text: entry.decimal),
-                                      );
-                                      ScaffoldMessenger.of(context)
-                                          .showSnackBar(
-                                            const SnackBar(
-                                              content: Text('Decimal copied'),
-                                            ),
-                                          );
-                                    },
+                                    onPressed: () => Clipboard.setData(
+                                      ClipboardData(text: entry.decimal),
+                                    ),
                                   ),
                                 ],
                               ),
@@ -1236,6 +1243,28 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     return _CalcButtonRole.programmer;
   }
 
+  String _calcButtonSemanticsLabel(CalcButtonConfig button) {
+    if (button.tooltip?.isNotEmpty ?? false) {
+      return button.tooltip!;
+    }
+    return switch (button.displayText) {
+      'AC' => 'Clear all',
+      'DEL' => 'Delete previous character',
+      '←' => 'Move cursor left',
+      '→' => 'Move cursor right',
+      'SPACE' => 'Insert space',
+      '=' => 'Calculate',
+      '/' => 'Divide',
+      '*' => 'Multiply',
+      '-' => 'Subtract',
+      '+' => 'Add',
+      '.' => 'Decimal point',
+      '(' => 'Left parenthesis',
+      ')' => 'Right parenthesis',
+      _ => button.displayText,
+    };
+  }
+
   ButtonStyle _calcButtonStyle(BuildContext context, CalcButtonConfig button) {
     final colors = Theme.of(context).colorScheme;
     final role = _calcButtonRole(button);
@@ -1326,9 +1355,13 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
       },
       child: FittedBox(
         fit: BoxFit.scaleDown,
-        child: Text(
-          button.displayText,
-          style: TextStyle(fontSize: fontSize, fontWeight: FontWeight.w700),
+        child: Semantics(
+          label: _calcButtonSemanticsLabel(button),
+          excludeSemantics: true,
+          child: Text(
+            button.displayText,
+            style: TextStyle(fontSize: fontSize, fontWeight: FontWeight.w700),
+          ),
         ),
       ),
     );
@@ -1421,11 +1454,15 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
             },
             child: FittedBox(
               fit: BoxFit.scaleDown,
-              child: Text(
-                button.displayText,
-                style: TextStyle(
-                  fontSize: fontSize,
-                  fontWeight: FontWeight.w700,
+              child: Semantics(
+                label: _calcButtonSemanticsLabel(button),
+                excludeSemantics: true,
+                child: Text(
+                  button.displayText,
+                  style: TextStyle(
+                    fontSize: fontSize,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
               ),
             ),
@@ -1559,16 +1596,28 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     }
 
     final buttonPanels = _buildButtonPanels(useCompactButtons);
-    final Widget inlineCalcButton = IconButton.filled(
-      icon: const Icon(Icons.calculate_outlined),
-      tooltip: 'Calculate',
-      onPressed: _calculateResult,
+    final Widget inlineCalcButton = Semantics(
+      label: 'Calculate',
+      button: true,
+      onTap: _calculateResult,
+      excludeSemantics: true,
+      child: IconButton.filled(
+        icon: const Icon(Icons.calculate_outlined),
+        tooltip: 'Calculate',
+        onPressed: _calculateResult,
+      ),
     );
 
-    final Widget inlineClearButton = IconButton.filledTonal(
-      icon: const Icon(Icons.delete_sweep_outlined),
-      tooltip: 'Clear expression',
-      onPressed: _clearResult,
+    final Widget inlineClearButton = Semantics(
+      label: 'Clear expression',
+      button: true,
+      onTap: _clearResult,
+      excludeSemantics: true,
+      child: IconButton.filledTonal(
+        icon: const Icon(Icons.delete_sweep_outlined),
+        tooltip: 'Clear expression',
+        onPressed: _clearResult,
+      ),
     );
 
     final expressionBorderColor = _bracketAnalysis.hasError
@@ -1621,37 +1670,56 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                 ),
               ),
             Expanded(
-              child: InputDecorator(
-                decoration: InputDecoration(
-                  isDense: true,
-                  contentPadding: EdgeInsets.symmetric(
-                    vertical: compact ? 6 : 8,
-                    horizontal: compact ? 6 : 8,
+              child: Semantics(
+                label: '$label result',
+                value: value.isEmpty ? 'No result' : value,
+                textField: true,
+                readOnly: true,
+                excludeSemantics: true,
+                child: InputDecorator(
+                  decoration: InputDecoration(
+                    isDense: true,
+                    contentPadding: EdgeInsets.symmetric(
+                      vertical: compact ? 6 : 8,
+                      horizontal: compact ? 6 : 8,
+                    ),
+                    border: border,
+                    enabledBorder: border,
                   ),
-                  border: border,
-                  enabledBorder: border,
-                ),
-                child: SelectableText(
-                  value,
-                  maxLines: 1,
-                  style: TextStyle(
-                    fontSize: compact ? 14 : 16,
-                    color: isError ? colorScheme.error : null,
+                  child: SelectableText(
+                    value,
+                    maxLines: 1,
+                    style: TextStyle(
+                      fontSize: compact ? 14 : 16,
+                      color: isError ? colorScheme.error : null,
+                    ),
                   ),
                 ),
               ),
             ),
-            IconButton(
-              icon: Icon(Icons.copy, size: 20),
-              tooltip: 'Copy',
-              onPressed: value.isNotEmpty && value != 'Error'
-                  ? () {
-                      Clipboard.setData(ClipboardData(text: value));
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Copied to clipboard')),
-                      );
-                    }
+            Semantics(
+              label: 'Copy $label result',
+              button: true,
+              enabled: value.isNotEmpty && value != 'Error',
+              onTap: value.isNotEmpty && value != 'Error'
+                  ? () => _copyResult(label, value)
                   : null,
+              excludeSemantics: true,
+              child: Tooltip(
+                message: _copiedResultLabel == label
+                    ? '$label result copied'
+                    : 'Copy $label result',
+                excludeFromSemantics: true,
+                child: IconButton(
+                  icon: Icon(
+                    _copiedResultLabel == label ? Icons.check : Icons.copy,
+                    size: 20,
+                  ),
+                  onPressed: value.isNotEmpty && value != 'Error'
+                      ? () => _copyResult(label, value)
+                      : null,
+                ),
+              ),
             ),
           ],
         ),
@@ -1911,35 +1979,60 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                                             ),
                                           ),
                                         if (_expressionExpanded)
-                                          IconButton(
-                                            tooltip: 'Insert newline',
-                                            icon: const Icon(
-                                              Icons.keyboard_return,
+                                          Semantics(
+                                            label: 'Insert newline',
+                                            button: true,
+                                            excludeSemantics: true,
+                                            onTap: () => _handleCalcButtonTap(
+                                              const CalcButtonConfig(
+                                                displayText: 'Newline',
+                                                insertText: '\n',
+                                              ),
                                             ),
-                                            onPressed: () =>
-                                                _handleCalcButtonTap(
-                                                  const CalcButtonConfig(
-                                                    displayText: 'Newline',
-                                                    insertText: '\n',
+                                            child: IconButton(
+                                              tooltip: 'Insert newline',
+                                              icon: const Icon(
+                                                Icons.keyboard_return,
+                                              ),
+                                              onPressed: () =>
+                                                  _handleCalcButtonTap(
+                                                    const CalcButtonConfig(
+                                                      displayText: 'Newline',
+                                                      insertText: '\n',
+                                                    ),
                                                   ),
-                                                ),
+                                            ),
                                           ),
-                                        IconButton(
-                                          tooltip: _expressionExpanded
+                                        Semantics(
+                                          label: _expressionExpanded
                                               ? 'Collapse expression editor'
                                               : 'Expand expression editor',
-                                          icon: Icon(
-                                            _expressionExpanded
-                                                ? Icons.unfold_less
-                                                : Icons.unfold_more,
-                                          ),
-                                          onPressed: () {
+                                          button: true,
+                                          excludeSemantics: true,
+                                          onTap: () {
                                             setState(() {
                                               _expressionExpanded =
                                                   !_expressionExpanded;
                                             });
                                             _focusNode.requestFocus();
                                           },
+                                          child: IconButton(
+                                            tooltip: _expressionExpanded
+                                                ? 'Collapse expression editor'
+                                                : 'Expand expression editor',
+                                            icon: Icon(
+                                              _expressionExpanded
+                                                  ? Icons.unfold_less
+                                                  : Icons.unfold_more,
+                                            ),
+                                            onPressed: () {
+                                              setState(() {
+                                                _expressionExpanded =
+                                                    !_expressionExpanded;
+                                              });
+                                              _focusNode.requestFocus();
+                                            },
+                                          ),
                                         ),
                                       ],
                                     ),
@@ -1975,15 +2068,27 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                               if (!_mobileKeypad || !showCalcButtons) ...[
                                 inlineCalcButton,
                                 inlineClearButton,
-                                IconButton.filledTonal(
-                                  icon: const Icon(Icons.arrow_left),
-                                  tooltip: 'Move cursor left',
-                                  onPressed: () => _moveCursor(-1),
+                                Semantics(
+                                  label: 'Move cursor left',
+                                  button: true,
+                                  onTap: () => _moveCursor(-1),
+                                  excludeSemantics: true,
+                                  child: IconButton.filledTonal(
+                                    icon: const Icon(Icons.arrow_left),
+                                    tooltip: 'Move cursor left',
+                                    onPressed: () => _moveCursor(-1),
+                                  ),
                                 ),
-                                IconButton.filledTonal(
-                                  icon: const Icon(Icons.arrow_right),
-                                  tooltip: 'Move cursor right',
-                                  onPressed: () => _moveCursor(1),
+                                Semantics(
+                                  label: 'Move cursor right',
+                                  button: true,
+                                  onTap: () => _moveCursor(1),
+                                  excludeSemantics: true,
+                                  child: IconButton.filledTonal(
+                                    icon: const Icon(Icons.arrow_right),
+                                    tooltip: 'Move cursor right',
+                                    onPressed: () => _moveCursor(1),
+                                  ),
                                 ),
                               ],
                             ],

@@ -55,6 +55,9 @@ are not accepted; results must be numeric constant expressions.
   switch between light and dark themes from the application menu.
 - **Settings → Use system keyboard** lets you choose the phone keyboard or the
   calculator keypad. Your choice is saved; physical keyboards remain usable.
+- Screen readers receive named expression, result, keypad, application, and
+  window controls. See the [accessibility guide](docs/accessibility.md) for
+  widget tests and real GTK4/AT-SPI validation.
 
 Clang is the preferred evaluator where available. Optional backends have their
 own syntax and platform requirements.

@@ -19,6 +19,8 @@ Backend availability varies by platform.
 
 For the optional GTK4 runner, engine selection, and native window sizing, see
 [Linux GTK3 / GTK4 development](linux-gtk.md). GTK3 remains the default.
+For widget semantics and real GTK4 AT-SPI validation, see
+[Accessibility](accessibility.md).
 
 ## Flatpak
 
