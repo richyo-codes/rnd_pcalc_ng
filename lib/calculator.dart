@@ -545,8 +545,16 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
       setState(() {
         hasCalculationError = false;
         decimalResult = integerValue.toString();
-        hexResult = formatHexResult(integerValue, bitWidth: bitWidth);
-        binaryResult = formatBinaryResult(integerValue, bitWidth: bitWidth);
+        hexResult = formatHexResult(
+          integerValue,
+          bitWidth: bitWidth,
+          isSigned: result.isSigned ?? true,
+        );
+        binaryResult = formatBinaryResult(
+          integerValue,
+          bitWidth: bitWidth,
+          isSigned: result.isSigned ?? true,
+        );
         floatResult = formatFloatResult(numericValue);
         history.add(
           HistoryEntry(
