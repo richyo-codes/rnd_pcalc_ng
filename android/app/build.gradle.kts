@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace = "com.richnetdesign.pcalcexpress"
+    namespace = "ca.richyoung.pcalcexpress"
     compileSdk = flutter.compileSdkVersion
     //ndkVersion = flutter.ndkVersion
     ndkVersion = "29.0.14033849"
@@ -17,7 +17,7 @@ android {
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.richnetdesign.pcalcexpress"
+        applicationId = "ca.richyoung.pcalcexpress"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion

@@ -139,7 +139,7 @@ resizing, GTK linkage and native close without screenshot comparisons:
 
 ```sh
 xvfb-run -a -s '-screen 0 1280x1024x24' python3 tools/test_linux_window.py \
-  build/linux/x64/debug/bundle/rnd_pcalc_ng --gtk gtk3
+  build/linux/x64/debug/bundle/pcalc_express --gtk gtk3
 ```
 
 It requires Xvfb and python-xlib. Pass the GTK4 bundle path and `--gtk gtk4`

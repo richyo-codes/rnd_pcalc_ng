@@ -2,13 +2,13 @@
 
 ## App ID
 
-- `com.richnetdesign.pcalcexpress`
+- `ca.richyoung.pcalcexpress`
 
 ## Files
 
-- Manifest: `flatpak/com.richnetdesign.pcalcexpress.yml`
-- Desktop entry: `flatpak/com.richnetdesign.pcalcexpress.desktop`
-- Metainfo: `flatpak/com.richnetdesign.pcalcexpress.metainfo.xml`
+- Manifest: `flatpak/ca.richyoung.pcalcexpress.yml`
+- Desktop entry: `flatpak/ca.richyoung.pcalcexpress.desktop`
+- Metainfo: `flatpak/ca.richyoung.pcalcexpress.metainfo.xml`
 - Host build script: `tools/build_flatpak.sh`
 - Container build script: `tools/build_flatpak_container.sh`
 
@@ -35,7 +35,7 @@ The script:
 
 1. Builds Flutter Linux release bundle
 2. Runs `flatpak-builder`
-3. Creates bundle at `build/flatpak-release/com.richnetdesign.pcalcexpress.flatpak`
+3. Creates bundle at `build/flatpak-release/ca.richyoung.pcalcexpress.flatpak`
 
 ## Build in container
 
@@ -51,8 +51,8 @@ Podman or Docker.
 ## Install & run
 
 ```bash
-flatpak install --user --reinstall ./build/flatpak-release/com.richnetdesign.pcalcexpress.flatpak
-flatpak run com.richnetdesign.pcalcexpress
+flatpak install --user --reinstall ./build/flatpak-release/ca.richyoung.pcalcexpress.flatpak
+flatpak run ca.richyoung.pcalcexpress
 ```
 
 ## Notes

@@ -2,7 +2,7 @@
 set -euo pipefail
 
 ROOT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
-APP_ID="com.richnetdesign.pcalcexpress"
+APP_ID="ca.richyoung.pcalcexpress"
 MANIFEST="$ROOT_DIR/flatpak/$APP_ID.yml"
 OUT_DIR="$ROOT_DIR/build"
 
@@ -60,8 +60,8 @@ fi
 
 flutter build linux --release
 
-if [[ ! -f "$ROOT_DIR/build/linux/x64/release/bundle/rnd_pcalc_ng" ]]; then
-  echo "Expected binary missing: build/linux/x64/release/bundle/rnd_pcalc_ng" >&2
+if [[ ! -f "$ROOT_DIR/build/linux/x64/release/bundle/pcalc_express" ]]; then
+  echo "Expected binary missing: build/linux/x64/release/bundle/pcalc_express" >&2
   exit 1
 fi
 

@@ -6,18 +6,18 @@
     "configurations": [
     
         {
-            "name": "rnd_pcalc_ng",
+            "name": "pcalc_express",
             "request": "launch",
             "type": "dart"
         },
         {
-            "name": "rnd_pcalc_ng (profile mode)",
+            "name": "pcalc_express (profile mode)",
             "request": "launch",
             "type": "dart",
             "flutterMode": "profile"
         },
         {
-            "name": "rnd_pcalc_ng (release mode)",
+            "name": "pcalc_express (release mode)",
             "request": "launch",
             "type": "dart",
             "flutterMode": "release"

@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <component type="desktop-application">
-  <id>com.richnetdesign.pcalcexpress</id>
+  <id>ca.richyoung.pcalcexpress</id>
   <name>pcalc express</name>
   <summary>Programmer calculator with C-like expressions</summary>
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>AGPL-3.0-only</project_license>
-  <launchable type="desktop-id">com.richnetdesign.pcalcexpress.desktop</launchable>
+  <launchable type="desktop-id">ca.richyoung.pcalcexpress.desktop</launchable>
   <description>
     <p>
       pcalc express is a programmer calculator inspired by AnalogX PCalc and
@@ -17,7 +17,7 @@
     <category>Utility</category>
     <category>Calculator</category>
   </categories>
-  <developer id="com.richnetdesign">
+  <developer id="ca.richyoung">
     <name>RichNetDesign</name>
   </developer>
 </component>

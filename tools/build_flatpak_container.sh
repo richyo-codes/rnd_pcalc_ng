@@ -2,7 +2,7 @@
 set -euo pipefail
 
 ROOT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
-APP_ID="com.richnetdesign.pcalcexpress"
+APP_ID="ca.richyoung.pcalcexpress"
 MANIFEST="$ROOT_DIR/flatpak/$APP_ID.yml"
 BUILD_DIR="$ROOT_DIR/build/flatpak"
 REPO_DIR="$ROOT_DIR/build/flatpak-repo"
@@ -32,8 +32,8 @@ IMAGE="ghcr.io/flathub-infra/flatpak-builder-lint:latest"
 mkdir -p "$ROOT_DIR/build"
 
 HOST_BUNDLE_DIR="$ROOT_DIR/build/linux/x64/release/bundle"
-if [[ ! -f "$HOST_BUNDLE_DIR/rnd_pcalc_ng" ]]; then
-  echo "Missing $HOST_BUNDLE_DIR/rnd_pcalc_ng. Run: flutter build linux --release" >&2
+if [[ ! -f "$HOST_BUNDLE_DIR/pcalc_express" ]]; then
+  echo "Missing $HOST_BUNDLE_DIR/pcalc_express. Run: flutter build linux --release" >&2
   exit 1
 fi
 

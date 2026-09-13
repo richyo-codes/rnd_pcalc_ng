@@ -1,4 +1,4 @@
-package com.richnetdesign.pcalcexpress
+package ca.richyoung.pcalcexpress
 
 import io.flutter.embedding.android.FlutterActivity
 

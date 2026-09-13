@@ -1,8 +1,8 @@
 # Project-level configuration shared by the GTK3 and GTK4 runners.
 cmake_minimum_required(VERSION 3.13)
 project(runner LANGUAGES CXX)
-set(BINARY_NAME "rnd_pcalc_ng")
-set(APPLICATION_ID "com.richnetdesign.pcalcexpress")
+set(BINARY_NAME "pcalc_express")
+set(APPLICATION_ID "ca.richyoung.pcalcexpress")
 
 # The environment selects a one-shot build; the ignored file is a local default.
 if(NOT "$ENV{FLUTTER_LINUX_GTK}" STREQUAL "")

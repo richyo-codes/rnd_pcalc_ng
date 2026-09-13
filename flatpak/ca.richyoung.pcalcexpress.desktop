@@ -1,10 +1,10 @@
 [Desktop Entry]
 Name=pcalc express
 Comment=Programmer-focused expression calculator
-Exec=run-rnd-pcalc-ng
-Icon=com.richnetdesign.pcalcexpress
+Exec=run-pcalc-express
+Icon=ca.richyoung.pcalcexpress
 Terminal=false
 Type=Application
 Categories=Utility;Calculator;
 StartupNotify=true
-StartupWMClass=com.richnetdesign.pcalcexpress
+StartupWMClass=ca.richyoung.pcalcexpress

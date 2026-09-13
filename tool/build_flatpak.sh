@@ -2,10 +2,10 @@
 set -euo pipefail
 
 ROOT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
-APP_ID="com.richnetdesign.pcalcexpress"
+APP_ID="ca.richyoung.pcalcexpress"
 MANIFEST="$ROOT_DIR/flatpak/$APP_ID.yml"
-DEFAULT_OUT_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/rnd-pcalc-ng/flatpak"
-TMP_OUT_DIR="/tmp/rnd-pcalc-ng-flatpak"
+DEFAULT_OUT_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/pcalc-express/flatpak"
+TMP_OUT_DIR="/tmp/pcalc-express-flatpak"
 
 usage() {
   cat <<'EOF'

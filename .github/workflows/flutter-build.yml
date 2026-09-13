@@ -91,8 +91,8 @@ jobs:
         if: github.event_name != 'pull_request'
         uses: richnetdesign/git-artifact-upload@v2
         with:
-          name: rnd-pcalc-ng-android-apk
-          filename: rnd-pcalc-ng-android-apk
+          name: pcalc-express-android-apk
+          filename: pcalc-express-android-apk
           version: ${{ steps.version.outputs.semver }}
           path: build/app/outputs/flutter-apk/app-release.apk
           append-max-detail-suffix: true
@@ -153,8 +153,8 @@ jobs:
         if: github.event_name != 'pull_request'
         uses: richnetdesign/git-artifact-upload@v2
         with:
-          name: rnd-pcalc-ng-linux-bundle
-          filename: rnd-pcalc-ng-linux-bundle
+          name: pcalc-express-linux-bundle
+          filename: pcalc-express-linux-bundle
           version: ${{ steps.version.outputs.semver }}
           path: build/linux/x64/release/bundle/
           append-max-detail-suffix: true
@@ -253,7 +253,7 @@ jobs:
           set -euo pipefail
           bundle=build/linux-gtk4/x64/release/bundle
           test -f "$bundle/lib/libflutter_linux_gtk4.so"
-          ldd "$bundle/rnd_pcalc_ng" | tee "$RUNNER_TEMP/pcalc-gtk4-linkage.txt"
+          ldd "$bundle/pcalc_express" | tee "$RUNNER_TEMP/pcalc-gtk4-linkage.txt"
           grep -q 'libgtk-4.so' "$RUNNER_TEMP/pcalc-gtk4-linkage.txt"
           if grep -Eq 'libgtk-3.so|not found' "$RUNNER_TEMP/pcalc-gtk4-linkage.txt"; then
             echo "GTK4 bundle contains GTK3 or unresolved libraries." >&2
@@ -315,8 +315,8 @@ jobs:
       - name: Upload Windows artifact
         uses: richnetdesign/git-artifact-upload@v2
         with:
-          name: rnd-pcalc-ng-windows-bundle
-          filename: rnd-pcalc-ng-windows-bundle
+          name: pcalc-express-windows-bundle
+          filename: pcalc-express-windows-bundle
           version: ${{ steps.version.outputs.semver }}
           path: build/windows/x64/runner/Release/
           append-max-detail-suffix: true
@@ -355,10 +355,10 @@ jobs:
         if: github.event_name != 'pull_request'
         uses: richnetdesign/git-artifact-upload@v2
         with:
-          name: rnd-pcalc-ng-macos-app
-          filename: rnd-pcalc-ng-macos-app
+          name: pcalc-express-macos-app
+          filename: pcalc-express-macos-app
           version: ${{ steps.version.outputs.semver }}
-          path: build/macos/Build/Products/Release/rnd_pcalc_ng.app/
+          path: build/macos/Build/Products/Release/pcalc_express.app/
           append-max-detail-suffix: true
           retention-days: 7
 
@@ -412,16 +412,16 @@ jobs:
         run: flutter pub get
 
       - name: Build Flatpak bundle
-        run: bash ./tools/build_flatpak.sh --out-dir "$RUNNER_TEMP/rnd-pcalc-ng-flatpak"
+        run: bash ./tools/build_flatpak.sh --out-dir "$RUNNER_TEMP/pcalc-express-flatpak"
 
       - name: Upload Flatpak artifact
         if: github.event_name != 'pull_request'
         uses: richnetdesign/git-artifact-upload@v2
         with:
-          name: rnd-pcalc-ng-flatpak
-          filename: rnd-pcalc-ng-flatpak
+          name: pcalc-express-flatpak
+          filename: pcalc-express-flatpak
           version: ${{ steps.version.outputs.semver }}
-          path: ${{ runner.temp }}/rnd-pcalc-ng-flatpak/com.richnetdesign.pcalcexpress.flatpak
+          path: ${{ runner.temp }}/pcalc-express-flatpak/ca.richyoung.pcalcexpress.flatpak
           append-max-detail-suffix: true
           retention-days: 7
 
@@ -459,8 +459,8 @@ jobs:
         if: github.event_name != 'pull_request'
         uses: richnetdesign/git-artifact-upload@v2
         with:
-          name: rnd-pcalc-ng-web-wasm
-          filename: rnd-pcalc-ng-web-wasm
+          name: pcalc-express-web-wasm
+          filename: pcalc-express-web-wasm
           version: ${{ steps.version.outputs.semver }}
           path: build/web/
           append-max-detail-suffix: true
