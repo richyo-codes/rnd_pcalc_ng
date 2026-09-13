@@ -444,6 +444,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   List<HistoryEntry> history = [];
   bool showCalcButtons = false;
   bool _expressionExpanded = false;
+  double? _expressionEditorHeight;
   String _selectedResultLabel = "Dec";
   _ResultDisplayMode _resultDisplayMode = _ResultDisplayMode.adaptive;
 
@@ -1391,7 +1392,9 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
         final usableWidth = width - spacing * (effectiveColumnCount - 1);
         final usableHeight = height - spacing * (effectiveRowCount - 1);
         final cellWidth = usableWidth / effectiveColumnCount;
-        final cellHeight = usableHeight / effectiveRowCount;
+        // A taller editor can leave little room for the keypad. Keep keys
+        // usable and scroll the grid instead of producing tiny/negative cells.
+        final cellHeight = math.max(44.0, usableHeight / effectiveRowCount);
         final aspectRatio = cellHeight > 0 ? cellWidth / cellHeight : 1.1;
         final double baseFontSize = cellHeight > 0
             ? math.max(14.0, math.min(cellHeight * 0.35, 22.0))
@@ -1484,7 +1487,12 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
         return GridView.builder(
           itemCount: flattenedButtons.length,
           shrinkWrap: true,
-          physics: NeverScrollableScrollPhysics(),
+          physics:
+              cellHeight * effectiveRowCount +
+                      spacing * (effectiveRowCount - 1) >
+                  height
+              ? const ClampingScrollPhysics()
+              : const NeverScrollableScrollPhysics(),
           padding: EdgeInsets.zero,
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: effectiveColumnCount,
@@ -1519,6 +1527,37 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     final bool useCompactButtons =
         // The merged board needs 720px plus the body's horizontal padding.
         size.width < 752 || size.height < 720 || !useWideLayout;
+    final availableHeight =
+        size.height - MediaQuery.viewInsetsOf(context).bottom;
+    // Reserve space for the results, window chrome, keypad selector and at
+    // least one usable row of keys. Remaining keypad rows can scroll.
+    final reservedHeight = showCalcButtons
+        ? (useCompactResults ? 400.0 : 520.0)
+        : 200.0;
+    final maxEditorHeight = math
+        .min(availableHeight * 0.6, availableHeight - reservedHeight)
+        .clamp(80.0, 480.0)
+        .toDouble();
+    final defaultEditorHeight = (availableHeight * 0.22)
+        .clamp(80.0, math.min(176.0, maxEditorHeight))
+        .toDouble();
+    final editorHeight = (_expressionEditorHeight ?? defaultEditorHeight).clamp(
+      80.0,
+      maxEditorHeight,
+    );
+    void resizeEditor(double delta) {
+      setState(() {
+        _expressionEditorHeight =
+            ((_expressionEditorHeight ?? defaultEditorHeight).clamp(
+                      80.0,
+                      maxEditorHeight,
+                    ) +
+                    delta)
+                .clamp(80.0, maxEditorHeight)
+                .toDouble();
+      });
+    }
+
     final buttonPanels = _buildButtonPanels(useCompactButtons);
     final Widget inlineCalcButton = IconButton.filled(
       icon: const Icon(Icons.calculate_outlined),
@@ -1841,13 +1880,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                     child: Column(
                       children: [
                         SizedBox(
-                          height: _expressionExpanded
-                              ? ((size.height -
-                                            MediaQuery.viewInsetsOf(context)
-                                                .bottom) *
-                                        0.22)
-                                    .clamp(80.0, 176.0)
-                              : 56,
+                          height: _expressionExpanded ? editorHeight : 56,
                           child: Row(
                             children: [
                               Expanded(
@@ -1956,7 +1989,59 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                             ],
                           ),
                         ),
-                        SizedBox(height: 16),
+                        if (_expressionExpanded)
+                          TextFieldTapRegion(
+                            child: Semantics(
+                              label: 'Expression editor height',
+                              value: '${editorHeight.round()} pixels',
+                              increasedValue: editorHeight < maxEditorHeight
+                                  ? '${math.min(editorHeight + 24, maxEditorHeight).round()} pixels'
+                                  : null,
+                              decreasedValue: editorHeight > 80
+                                  ? '${math.max(editorHeight - 24, 80).round()} pixels'
+                                  : null,
+                              onIncrease: editorHeight < maxEditorHeight
+                                  ? () => resizeEditor(24)
+                                  : null,
+                              onDecrease: editorHeight > 80
+                                  ? () => resizeEditor(-24)
+                                  : null,
+                              child: Tooltip(
+                                message: 'Drag to resize expression editor',
+                                child: MouseRegion(
+                                  cursor: SystemMouseCursors.resizeUpDown,
+                                  child: GestureDetector(
+                                    key: const ValueKey(
+                                      'expression-resize-handle',
+                                    ),
+                                    behavior: HitTestBehavior.opaque,
+                                    onVerticalDragUpdate: (details) =>
+                                        resizeEditor(details.delta.dy),
+                                    child: SizedBox(
+                                      height: 24,
+                                      width: double.infinity,
+                                      child: Center(
+                                        child: Container(
+                                          width: 36,
+                                          height: 4,
+                                          decoration: BoxDecoration(
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .outlineVariant,
+                                            borderRadius: BorderRadius.circular(
+                                              2,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          )
+                        else
+                          const SizedBox(height: 16),
                         if (showCalcButtons)
                           Align(
                             alignment: Alignment.topLeft,

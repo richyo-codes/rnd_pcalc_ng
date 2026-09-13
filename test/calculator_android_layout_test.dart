@@ -1,3 +1,5 @@
+import 'dart:ui' show PointerDeviceKind;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -33,6 +35,95 @@ Future<void> _pumpCalculatorHarness(
 }
 
 void main() {
+  for (final keyboardEnabled in [false, true]) {
+    testWidgets(
+      'editor expands on first unfocused mouse click (keyboard $keyboardEnabled)',
+      (tester) async {
+        final previous = useSystemKeyboardNotifier.value;
+        addTearDown(() => useSystemKeyboardNotifier.value = previous);
+        useSystemKeyboardNotifier.value = keyboardEnabled;
+        await _pumpCalculatorHarness(
+          tester,
+          surfaceSize: const Size(1280, 1000),
+        );
+        final field = find.byType(TextField);
+        await tester.enterText(field, '(1 + 2)');
+        tester.widget<TextField>(field).focusNode!.unfocus();
+        await tester.pumpAndSettle();
+        final initialHeight = tester.getSize(field).height;
+        await tester.tap(
+          find.byTooltip('Expand expression editor'),
+          kind: PointerDeviceKind.mouse,
+        );
+        await tester.pump();
+        expect(tester.getSize(field).height, greaterThan(initialHeight));
+        expect(find.byTooltip('Collapse expression editor'), findsOneWidget);
+        expect(tester.takeException(), isNull);
+      },
+    );
+  }
+
+  testWidgets(
+    'multiline editor drag preserves text, cursor and chosen height',
+    (tester) async {
+      await _pumpCalculatorHarness(tester, surfaceSize: const Size(900, 900));
+      final field = find.byType(TextField);
+      final handle = find.byKey(const ValueKey('expression-resize-handle'));
+      expect(handle, findsNothing);
+      await tester.tap(find.byTooltip('Expand expression editor'));
+      await tester.pumpAndSettle();
+      await tester.enterText(field, '1 +\n2');
+      final controller = tester.widget<TextField>(field).controller!;
+      controller.selection = const TextSelection.collapsed(offset: 3);
+      await tester.pump();
+      final initialHeight = tester.getSize(field).height;
+
+      await tester.drag(handle, const Offset(0, 100));
+      await tester.pumpAndSettle();
+      final chosenHeight = tester.getSize(field).height;
+      expect(chosenHeight, greaterThan(initialHeight));
+      expect(controller.text, '1 +\n2');
+      expect(controller.selection.extentOffset, 3);
+      expect(tester.widget<TextField>(field).focusNode!.hasFocus, isTrue);
+
+      await _pumpCalculatorHarness(tester, surfaceSize: const Size(360, 640));
+      expect(tester.getSize(field).height, lessThan(chosenHeight));
+      expect(tester.takeException(), isNull);
+      await _pumpCalculatorHarness(tester, surfaceSize: const Size(900, 900));
+      expect(tester.getSize(field).height, chosenHeight);
+
+      await tester.tap(find.byTooltip('Collapse expression editor'));
+      await tester.pumpAndSettle();
+      expect(handle, findsNothing);
+      expect(tester.getSize(field).height, 56);
+      await tester.tap(find.byTooltip('Expand expression editor'));
+      await tester.pumpAndSettle();
+      expect(tester.getSize(field).height, chosenHeight);
+      await tester.drag(handle, const Offset(0, -1000));
+      await tester.pumpAndSettle();
+      expect(tester.getSize(field).height, 80);
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets('multiline drag height stays bounded on a short phone', (
+    tester,
+  ) async {
+    await _pumpCalculatorHarness(tester, surfaceSize: const Size(360, 640));
+    await tester.tap(find.byTooltip('Expand expression editor'));
+    await tester.pumpAndSettle();
+    final handle = find.byKey(const ValueKey('expression-resize-handle'));
+    await tester.drag(handle, const Offset(0, 2000));
+    await tester.pumpAndSettle();
+    final height = tester.getSize(find.byType(TextField)).height;
+    expect(height, inInclusiveRange(80, 340));
+    expect(tester.takeException(), isNull);
+    await tester.drag(handle, const Offset(0, -2000));
+    await tester.pumpAndSettle();
+    expect(tester.getSize(find.byType(TextField)).height, 80);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('expanded editor calculates with Control Enter', (tester) async {
     await _pumpCalculatorHarness(tester, surfaceSize: const Size(900, 800));
     await tester.tap(find.byTooltip('Expand expression editor'));

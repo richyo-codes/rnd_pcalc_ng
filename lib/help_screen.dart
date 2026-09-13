@@ -42,7 +42,7 @@ class HelpScreen extends StatelessWidget {
                   ),
                   const _HelpSection(
                     'Multiline expressions',
-                    'Use the expand button inside the expression field for multiple lines. Enter inserts a newline in expanded mode; Ctrl+Enter or Command+Enter calculates. The newline button works with the system keyboard off. Collapsing preserves the expression and cursor position.',
+                    'Use the expand button inside the expression field for multiple lines. Drag the grip below the expanded field to adjust its height. Enter inserts a newline in expanded mode; Ctrl+Enter or Command+Enter calculates. The newline button works with the system keyboard off. Collapsing preserves the expression, cursor position, and chosen height.',
                   ),
                   const _HelpSection(
                     'Try these with Clang constexpr',
